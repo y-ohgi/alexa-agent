@@ -4,7 +4,7 @@
 | --- | --- |
 | ステータス | Draft |
 | 最終更新日 | 2026-07-13 |
-| 関連仕様 | [OVERVIEW_SPEC.md](./OVERVIEW_SPEC.md), [ARCHITECTURE_SPEC.md](./ARCHITECTURE_SPEC.md) |
+| 関連仕様 | [OVERVIEW_SPEC.md](./OVERVIEW_SPEC.md), [ARCHITECTURE_SPEC.md](./ARCHITECTURE_SPEC.md), [AUTH_SPEC.md](./AUTH_SPEC.md) |
 
 ## 概要
 
@@ -59,6 +59,13 @@ Alexa スキルの対話モデル(Invocation Name / Intent / Slot)と、
 ### 2. Lambda ⇔ AgentCore Runtime インターフェース
 
 呼び出しには AgentCore の `InvokeAgentRuntime` API を使用する。
+
+#### 認証
+
+- リクエストには Cognito から取得した JWT を `Authorization: Bearer <JWT>` として付与する
+  (スコープ: `alexa-agent/invoke`)
+- トークンの取得・キャッシュ・AgentCore Runtime 側の検証設定は
+  [AUTH_SPEC.md](./AUTH_SPEC.md) を参照
 
 #### リクエストペイロード(案)
 
@@ -117,3 +124,4 @@ Alexa スキルの対話モデル(Invocation Name / Intent / Slot)と、
 | 日付 | 変更内容 |
 | --- | --- |
 | 2026-07-13 | 初版作成 |
+| 2026-07-13 | InvokeAgentRuntime の認証(JWT Bearer)を追記、AUTH_SPEC を関連仕様に追加 |
