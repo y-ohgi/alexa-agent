@@ -64,7 +64,8 @@ flowchart LR
 - RuntimeはAgentCore CLIの `validate` / `deploy --plan` / `deploy` で管理する。
 - Alexa Lambda等の周辺AWS資源は `infra/cdk` からCDK deployする。同一資源をCLIとCDKで二重管理しない。
 - Alexaスキルmanifestと対話モデルはASK CLIでvalidate/deployする。
-- **ガード**: リポジトリ変数 `AWS_DEPLOY_ROLE_ARN` が未設定の間はデプロイジョブを**スキップ**(初期状態で失敗しないため)。OIDC ロール準備後に有効化する。
+- **ガード**: `AWS_DEPLOY_ROLE_ARN` が設定済みで、かつ `ENABLE_CDK_DEPLOY=true` の場合だけ
+  CDKデプロイを実行する。`infra/cdk` 実装前は有効化しない。
 
 ### 前提セットアップ(手動・一度きり)
 
