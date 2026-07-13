@@ -7,9 +7,11 @@
 | ファイル | 内容 | ステータス |
 | --- | --- | --- |
 | [OVERVIEW_SPEC.md](./OVERVIEW_SPEC.md) | プロダクト概要・ユースケース・スコープ | Draft |
+| [AGENTCORE_SPEC.md](./AGENTCORE_SPEC.md) | AgentCore 各機能の用途・採用フェーズ | Draft |
 | [ARCHITECTURE_SPEC.md](./ARCHITECTURE_SPEC.md) | システム構成・コンポーネント責務・設計制約 | Draft |
 | [API_SPEC.md](./API_SPEC.md) | Alexa 対話モデル・コンポーネント間インターフェース | Draft |
 | [AUTH_SPEC.md](./AUTH_SPEC.md) | 認証認可(ASK 検証・AgentCore Inbound/Outbound Auth) | Draft |
+| [CICD_SPEC.md](./CICD_SPEC.md) | CI/CD パイプライン(GitHub Actions・OIDC・並列ジョブ) | Draft |
 
 ## 命名規則
 
