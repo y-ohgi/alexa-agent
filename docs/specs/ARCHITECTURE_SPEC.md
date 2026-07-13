@@ -4,7 +4,7 @@
 | --- | --- |
 | ステータス | Draft |
 | 最終更新日 | 2026-07-13 |
-| 関連仕様 | [OVERVIEW_SPEC.md](./OVERVIEW_SPEC.md), [API_SPEC.md](./API_SPEC.md) |
+| 関連仕様 | [OVERVIEW_SPEC.md](./OVERVIEW_SPEC.md), [API_SPEC.md](./API_SPEC.md), [AUTH_SPEC.md](./AUTH_SPEC.md) |
 
 ## 概要
 
@@ -20,7 +20,21 @@
 
 ## 仕様(確定事項)
 
+### 技術スタック
+
+| 項目 | 選定 | 備考 |
+| --- | --- | --- |
+| 基盤モデル | **Claude Haiku 4.5**(Bedrock) | 安価・低レイテンシ・日本語会話品質のバランスで選定 |
+| エージェントフレームワーク | **Mastra**(TypeScript) | AgentCore Runtime 上で実行 |
+| 実装言語 | **TypeScript** | Lambda / エージェント共通 |
+| IaC | **AWS CDK (TypeScript)** | アプリと言語を統一 |
+| 認証基盤 | **Amazon Cognito + AgentCore の認証機構** | 詳細は [AUTH_SPEC.md](./AUTH_SPEC.md) |
+
 ### 全体構成(MVP)
+
+![alexa-agent MVP 構成図](./assets/architecture.png)
+
+処理の流れ(シーケンス):
 
 ```mermaid
 sequenceDiagram
@@ -46,9 +60,11 @@ sequenceDiagram
 | コンポーネント | 責務 |
 | --- | --- |
 | Alexa Skills Kit (対話モデル) | ウェイクコマンド「エージェンツ」での起動、発話のテキスト化、Intent へのルーティング |
-| スキルエンドポイント (Lambda) | Alexa リクエストの受付・署名検証(ASK SDK)、発話テキストの抽出、AgentCore 呼び出し、応答の SSML 整形、タイムアウト/エラーハンドリング |
-| AgentCore Runtime | エージェントロジックの実行。システムプロンプト管理、Bedrock 基盤モデルの呼び出し、セッション単位の会話文脈の維持 |
-| Bedrock 基盤モデル | 応答テキストの生成 |
+| スキルエンドポイント (Lambda / TypeScript) | Alexa リクエストの受付・署名検証(ASK SDK)、発話テキストの抽出、JWT 取得・AgentCore 呼び出し、応答の SSML 整形、タイムアウト/エラーハンドリング |
+| Cognito User Pool | Lambda → AgentCore 呼び出し用の JWT 発行([AUTH_SPEC.md](./AUTH_SPEC.md)) |
+| Secrets Manager | Cognito クライアントシークレットの保管 |
+| AgentCore Runtime (Mastra) | エージェントロジックの実行。システムプロンプト管理、Bedrock 基盤モデルの呼び出し、セッション単位の会話文脈の維持 |
+| Bedrock 基盤モデル (Claude Haiku 4.5) | 応答テキストの生成 |
 
 MVP ではエージェントロジックを AgentCore Runtime に置き、Lambda は「Alexa と AgentCore の
 アダプタ」に徹する。エージェントの能力拡張(ツール・記憶)は Lambda に手を入れず
@@ -84,18 +100,26 @@ AgentCore 側で完結させる。
 - MVP の会話文脈は AgentCore Runtime のセッション内で維持し、Lambda は状態を持たない
 - Alexa セッションが終了(Stop/タイムアウト)したら文脈も破棄されてよい
 
+### 構成図の運用
+
+- AWS アイコン付き構成図は diagram-as-code([mingrammer/diagrams](https://diagrams.mingrammer.com/))で管理する
+  - 定義: [`docs/diagrams/architecture.py`](../diagrams/architecture.py) / 生成物: `docs/specs/assets/architecture.png`
+  - 生成手順は [`docs/diagrams/README.md`](../diagrams/README.md) を参照
+- **構成を変更する PR では、同一 PR 内で図を再生成してコミットする**ことで、
+  構成図をニアリアルタイム(デプロイ単位)で実構成に追従させる
+- 将来: CDK デプロイの CI パイプラインに再生成ジョブを組み込み、自動更新に移行する
+
 ## 未確定事項 (Open Questions)
 
-- [ ] 使用する基盤モデル(例: Claude 系のどのモデルか。レイテンシ重視なら軽量モデルという選択肢)
 - [ ] AWS リージョン(AgentCore 対応リージョンと Alexa エンドポイントの近接性)
-- [ ] AgentCore Runtime 上のエージェント実装フレームワーク(Strands Agents / LangGraph / 自前 等)
-- [ ] IaC: CDK / Terraform / SAM のどれで管理するか(ASK 側は ask-cli を使うか)
-- [ ] Lambda のランタイム言語(Python / TypeScript)
-- [ ] Account Linking の要否(MVP では不要の想定で良いか)
+- [ ] ASK 側リソース(対話モデル・スキルマニフェスト)の管理方法(ask-cli / CDK Alexa 連携)
 - [ ] 監視・ログ方針(CloudWatch / AgentCore Observability)
+- [ ] モデルのフォールバック方針(コスト最優先なら Nova Lite 等のより安価なモデルへの切替基準)
+- [ ] 構成図自動化の実装方式(diagrams スクリプトの CI 実行 or cdk-dia への移行)
 
 ## 変更履歴
 
 | 日付 | 変更内容 |
 | --- | --- |
 | 2026-07-13 | 初版作成 |
+| 2026-07-13 | 技術スタック確定(Claude Haiku 4.5 / Mastra / TypeScript / CDK)、AWS アイコン構成図と運用ルールを追加、認証を AUTH_SPEC に分離 |
