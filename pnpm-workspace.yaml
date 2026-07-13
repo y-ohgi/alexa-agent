@@ -1,0 +1,7 @@
+packages:
+  - "apps/*"
+  - "infra/*"
+  - "packages/*"
+
+disallowWorkspaceCycles: true
+minimumReleaseAge: 1440

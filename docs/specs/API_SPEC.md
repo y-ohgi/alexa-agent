@@ -3,7 +3,7 @@
 | 項目 | 内容 |
 | --- | --- |
 | ステータス | Draft |
-| 最終更新日 | 2026-07-13 |
+| 最終更新日 | 2026-07-14 |
 | 関連仕様 | [OVERVIEW_SPEC.md](./OVERVIEW_SPEC.md), [ARCHITECTURE_SPEC.md](./ARCHITECTURE_SPEC.md), [AUTH_SPEC.md](./AUTH_SPEC.md) |
 
 ## 概要
@@ -62,10 +62,8 @@ Alexa スキルの対話モデル(Invocation Name / Intent / Slot)と、
 
 #### 認証
 
-- リクエストには Cognito から取得した JWT を `Authorization: Bearer <JWT>` として付与する
-  (スコープ: `alexa-agent/invoke`)
-- トークンの取得・キャッシュ・AgentCore Runtime 側の検証設定は
-  [AUTH_SPEC.md](./AUTH_SPEC.md) を参照
+- AWS SDK for JavaScriptの `InvokeAgentRuntime` を使用し、Lambda実行ロールでSigV4署名する
+- 実行ロールの権限とAgentCore Runtime側の認証設定は [AUTH_SPEC.md](./AUTH_SPEC.md) を参照
 
 #### リクエストペイロード(案)
 
@@ -125,3 +123,4 @@ Alexa スキルの対話モデル(Invocation Name / Intent / Slot)と、
 | --- | --- |
 | 2026-07-13 | 初版作成 |
 | 2026-07-13 | InvokeAgentRuntime の認証(JWT Bearer)を追記、AUTH_SPEC を関連仕様に追加 |
+| 2026-07-14 | MVPのInvokeAgentRuntime認証をIAM SigV4へ変更 |

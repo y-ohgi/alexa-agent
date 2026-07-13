@@ -3,7 +3,7 @@
 | 項目 | 内容 |
 | --- | --- |
 | ステータス | Draft |
-| 最終更新日 | 2026-07-13 |
+| 最終更新日 | 2026-07-14 |
 | 関連仕様 | [ARCHITECTURE_SPEC.md](./ARCHITECTURE_SPEC.md), [AUTH_SPEC.md](./AUTH_SPEC.md), [API_SPEC.md](./API_SPEC.md) |
 
 ## 概要
@@ -52,8 +52,8 @@
 
 ### 2. Identity(MVP: Inbound)
 
-- **Inbound Auth** は「IAM SigV4」か「OAuth JWT」の**排他選択**。本プロダクトは [AUTH_SPEC.md](./AUTH_SPEC.md) の方針に従い **Cognito の JWT(M2M)** を採用。
-  - 重要な制約: **OAuth JWT を使う場合、`InvokeAgentRuntime` を AWS SDK では呼べず、生の HTTPS リクエストが必要**。
+- **Inbound Auth** は「IAM SigV4」か「OAuth JWT」の**排他選択**。MVPは [AUTH_SPEC.md](./AUTH_SPEC.md) とADR-0002に従い **IAM SigV4** を採用する。
+  - Lambda実行ロールへ対象Runtimeに限定した `bedrock-agentcore:InvokeAgentRuntime` を許可する。
 - **Workload Identity** は Runtime デプロイ時に自動作成される。
 - **Outbound Auth / Token Vault**(Phase 2): 外部サービスの OAuth(2LO/3LO)・API キーを Token Vault で管理。Gateway/ツール連携で活用。
 - 詳細は [AUTH_SPEC.md](./AUTH_SPEC.md)。
@@ -97,14 +97,12 @@
 
 ## 未確定事項 (Open Questions)
 
-- [ ] リージョン: 東京(ap-northeast-1)で確定してよいか(AgentCore・Bedrock モデルの提供状況を要確認)
-- [ ] Inbound 認証を Cognito JWT のままにするか、MVP は IAM SigV4 で簡素化するか([AUTH_SPEC.md](./AUTH_SPEC.md) の Open Question と連動)
 - [ ] Memory 短期記憶を MVP で AgentCore Memory に載せるか、まずは Runtime セッション内文脈のみで足りるか(コストと学習価値のトレードオフ)
 - [ ] Code Interpreter を Phase 2 のどのユースケースで使うか(学習 PoC のテーマ)
-- [ ] Runtime のデプロイを `@aws/agentcore` CLI 中心にするか、CDK(`aws-bedrockagentcore` L2 のコンテナ artifact)中心にするか([ARCHITECTURE_SPEC.md](./ARCHITECTURE_SPEC.md) と連動)
 
 ## 変更履歴
 
 | 日付 | 変更内容 |
 | --- | --- |
 | 2026-07-13 | 初版作成(AgentCore 全機能の採用方針を整理) |
+| 2026-07-14 | MVPのInbound認証をIAM SigV4、リージョンを東京、RuntimeデプロイをAgentCore CLI管理に確定 |

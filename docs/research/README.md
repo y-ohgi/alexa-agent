@@ -13,6 +13,7 @@
 | --- | --- | --- |
 | [ALEXA.md](./ALEXA.md) | Amazon Alexa カスタムスキル開発(構成/ライフサイクル/ASK SDK/8秒制約/ツール) | Mermaid |
 | [AGENTCORE.md](./AGENTCORE.md) | Amazon Bedrock AgentCore 概要と各機能(Runtime/Memory/Gateway/Identity/Observability/Code Interpreter/Browser) | アーキ画像([docs/assets](../assets/)) |
+| [DEVELOPMENT_FOUNDATION.md](./DEVELOPMENT_FOUNDATION.md) | モノレポ、認証、デプロイ、モデル、Alexa制約の開発基盤調査 | なし |
 
 ## 今後の調査予定(必要に応じて追加)
 

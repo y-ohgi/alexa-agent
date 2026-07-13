@@ -10,7 +10,7 @@ from diagrams.aws.compute import ECR, Lambda
 from diagrams.aws.iot import IotAlexaEcho, IotAlexaSkill
 from diagrams.aws.management import Cloudwatch
 from diagrams.aws.ml import Bedrock
-from diagrams.aws.security import Cognito, SecretsManager
+from diagrams.aws.security import IAMRole
 from diagrams.onprem.client import User
 
 graph_attr = {
@@ -42,8 +42,7 @@ with Diagram(
         endpoint = Lambda("Lambda アダプタ\n(TypeScript)")
 
         with Cluster("認証 (AUTH_SPEC)"):
-            cognito = Cognito("Cognito User Pool\n(M2M / JWT 発行)")
-            secrets = SecretsManager("Secrets Manager\n(クライアントシークレット)")
+            role = IAMRole("Lambda 実行ロール\n(IAM SigV4)")
 
         with Cluster("Bedrock AgentCore"):
             runtime = Bedrock("AgentCore Runtime\n(Mastra / HTTP :8080)")
@@ -55,9 +54,8 @@ with Diagram(
 
     user >> Edge(label="「Alexa、エージェンツ」") >> echo >> skill
     skill >> Edge(label="IntentRequest\n(署名 + Skill ID 検証)") >> endpoint
-    endpoint >> Edge(label="client_credentials → JWT") >> cognito
-    endpoint >> Edge(style="dashed", label="シークレット取得") >> secrets
-    endpoint >> Edge(label="InvokeAgentRuntime\n(HTTPS + Bearer JWT)") >> runtime
+    role >> Edge(style="dashed", label="最小権限") >> endpoint
+    endpoint >> Edge(label="InvokeAgentRuntime\n(AWS SDK + SigV4)") >> runtime
     runtime >> Edge(label="推論") >> model
     runtime >> Edge(label="CreateEvent / ListEvents") >> memory
     ecr >> Edge(style="dashed", label="イメージ") >> runtime
