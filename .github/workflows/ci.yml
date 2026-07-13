@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+# 独立したジョブを並列実行する(相互依存なし)
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs:
+    name: docs (markdown lint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: markdownlint
+        run: npx --yes markdownlint-cli2 "**/*.md" "#node_modules"
+
+  diagram:
+    name: diagram (generate check)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Graphviz and fonts
+        run: sudo apt-get update && sudo apt-get install -y graphviz fonts-noto-cjk
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install diagrams
+        run: pip install diagrams
+      - name: Generate diagrams (health check)
+        working-directory: docs/diagrams
+        run: |
+          for f in *.py; do
+            echo "== generating from $f =="
+            python3 "$f"
+          done
+
+  actionlint:
+    name: actionlint (workflow lint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run actionlint
+        uses: reviewdog/action-actionlint@v1
+        with:
+          reporter: github-check
+
+  # --- 以下はアプリコード(package.json)投入後に自動で有効化される ---
+  lint:
+    name: lint (eslint)
+    runs-on: ubuntu-latest
+    if: ${{ hashFiles('package.json') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
+  typecheck:
+    name: typecheck (tsc)
+    runs-on: ubuntu-latest
+    if: ${{ hashFiles('package.json') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    if: ${{ hashFiles('package.json') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  build:
+    name: build (arm64 container)
+    runs-on: ubuntu-latest
+    if: ${{ hashFiles('package.json') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      # AgentCore Runtime は arm64 コンテナ必須。Dockerfile 追加後にビルド検証を有効化する
+      - name: Set up Docker Buildx
+        if: ${{ hashFiles('**/Dockerfile') != '' }}
+        uses: docker/setup-buildx-action@v3
+      - name: Build arm64 image (no push)
+        if: ${{ hashFiles('**/Dockerfile') != '' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/arm64
+          push: false

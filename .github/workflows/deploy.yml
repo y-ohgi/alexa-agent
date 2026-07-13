@@ -1,0 +1,42 @@
+name: Deploy
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "packages/**"
+      - "infra/**"
+      - "app/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+# OIDC で短期 STS を取得する(長期アクセスキーは使わない)
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: cdk deploy
+    runs-on: ubuntu-latest
+    # デプロイ用 IAM ロール(OIDC)未設定の間はスキップして CI を赤くしない
+    if: ${{ vars.AWS_DEPLOY_ROLE_ARN != '' }}
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - run: npm ci
+      - name: CDK deploy
+        run: npx cdk deploy --all --require-approval never
