@@ -73,9 +73,9 @@ with Diagram(
     # 主経路
     user >> Edge(label="「Alexa、エージェンツ」") >> echo >> skill
     skill >> Edge(label="IntentRequest") >> endpoint
-    endpoint >> Edge(label="JWT 取得") >> cognito
-    endpoint >> Edge(style="dashed") >> secrets
-    endpoint >> Edge(label="InvokeAgentRuntime\n(HTTPS + JWT)") >> runtime
+    endpoint >> Edge(label="MVP: IAM SigV4") >> runtime
+    endpoint >> Edge(style="dotted", label="Phase 3: Account Linking") >> cognito
+    cognito >> Edge(style="dashed", label="client secret") >> secrets
     runtime >> Edge(label="推論") >> model
 
     # AgentCore 機能連携
