@@ -13,14 +13,14 @@
 | --- | --- | --- |
 | [ALEXA.md](./ALEXA.md) | Amazon Alexa カスタムスキル開発(構成/ライフサイクル/ASK SDK/8秒制約/ツール) | Mermaid |
 | [AGENTCORE.md](./AGENTCORE.md) | Amazon Bedrock AgentCore 概要と各機能(Runtime/Memory/Gateway/Identity/Observability/Code Interpreter/Browser) | アーキ画像([docs/assets](../assets/)) |
+| [BEDROCK_MODELS.md](./BEDROCK_MODELS.md) | 音声対話向けモデル候補と実測ゲート | なし |
+| [COST.md](./COST.md) | MVPコストモデルと予算・runaway防止策 | なし |
 | [DEVELOPMENT_FOUNDATION.md](./DEVELOPMENT_FOUNDATION.md) | モノレポ、認証、デプロイ、モデル、Alexa制約の開発基盤調査 | なし |
+| [MASTRA.md](./MASTRA.md) | MastraとAgentCore Runtimeの公式統合方式 | なし |
 
 ## 今後の調査予定(必要に応じて追加)
 
-- **MASTRA.md** — Mastra(TypeScript エージェントフレームワーク)の詳細: エージェント/ツール(Zod)/ワークフロー/評価(evals)/dynamic agents・runtime context・Agent Editor、AgentCore へのデプロイ。実装着手前に必要。
-- **BEDROCK_MODELS.md** — 音声対話向けモデル比較(Claude Haiku 4.5 / Nova Micro・Lite 等)。レイテンシ・日本語品質・料金・prompt caching の観点。[Issue #2](https://github.com/y-ohgi/alexa-agent/issues/2) と連動。
 - **CDK_AGENTCORE.md** — AgentCore の CDK/CloudFormation/Terraform 対応と construct の成熟度(L1/L2、`aws-bedrockagentcore` の安定版 vs alpha の食い違いを一次情報で確定)。
-- **COST.md** — AgentCore + Bedrock の従量課金の試算とコスト管理(予算アラーム・ランナウェイ防止)。
 
 ## 運用メモ
 
